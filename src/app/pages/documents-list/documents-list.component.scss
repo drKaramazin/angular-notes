@@ -27,5 +27,6 @@ nav {
 }
 
 .container {
-  @include wh-100;
+  @include h-100;
+  flex-grow: 1;
 }
