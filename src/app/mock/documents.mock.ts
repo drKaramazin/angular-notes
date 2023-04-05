@@ -13,23 +13,23 @@ export const DocumentsMock: DocumentsListResponse = {
   list: [{
     slug: slug(Names.FirstDocument),
     name: Names.FirstDocument,
-    url: '1.png',
+    url: 'assets/pages/1.png',
   }, {
     slug: slug(Names.SecondDocument),
     name: Names.SecondDocument,
-    url: '2.png',
+    url: 'assets/pages/2.png',
   }, {
     slug: slug(Names.ThirdDocument),
     name: Names.ThirdDocument,
-    url: '3.png',
+    url: 'assets/pages/3.png',
   }, {
     slug: slug(Names.FourthDocument),
     name: Names.FourthDocument,
-    url: '4.png',
+    url: 'assets/pages/4.png',
   }, {
     slug: slug(Names.FifthDocument),
     name: Names.FifthDocument,
-    url: '5.png',
+    url: 'assets/pages/5.png',
   }],
   index: 0,
   limit: 10,
