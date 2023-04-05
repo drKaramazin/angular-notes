@@ -18,6 +18,7 @@
     "@angular/platform-browser": "^14.2.0",
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@angular/router": "^14.2.0",
+    "konva": "^8.4.3",
     "reset-css": "^5.0.1",
     "rxjs": "~7.5.0",
     "slug": "^8.2.2",
