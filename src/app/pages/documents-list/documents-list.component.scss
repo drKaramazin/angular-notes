@@ -1,0 +1,31 @@
+@import "variables";
+@import "mixins";
+
+:host {
+  display: flex;
+  flex-direction: row;
+  @include wh-100;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  background: $color-blue-500;
+  flex-shrink: 0;
+  @include h-100;
+
+  a {
+    color: $color-white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+
+    &:hover {
+      background: $color-blue-400;
+    }
+  }
+}
+
+.container {
+  @include wh-100;
+}
