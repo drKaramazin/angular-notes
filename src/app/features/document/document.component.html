@@ -1,0 +1,9 @@
+<section class="pages">
+  <h1>Pages</h1>
+  <nav *ngIf="list">
+    <a *ngFor="let document of list.list" [routerLink]="[document.slug]">{{document.name}}</a>
+  </nav>
+</section>
+<section class="container">
+  <router-outlet></router-outlet>
+</section>

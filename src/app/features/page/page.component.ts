@@ -10,7 +10,7 @@ import {
 import Konva from 'konva';
 import { ActivatedRoute } from '@angular/router';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
-import { Document } from '@app/model/document';
+import { Page } from '@app/model/page';
 import Layer = Konva.Layer;
 import Stage = Konva.Stage;
 import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
@@ -18,21 +18,21 @@ import { environment } from '@env/environment.prod';
 import Image = Konva.Image;
 
 @Component({
-  selector: 'app-document',
-  templateUrl: './document.component.html',
-  styleUrls: ['./document.component.scss'],
+  selector: 'app-page',
+  templateUrl: './page.component.html',
+  styleUrls: ['./page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentComponent extends BaseAbstractComponent implements OnDestroy {
+export class PageComponent extends BaseAbstractComponent implements OnDestroy {
 
   @ViewChild('document', { static: false }) documentElementRef?: ElementRef;
 
-  private _document?: Document;
-  @Input() set document(document: Document | undefined) {
+  private _document?: Page;
+  @Input() set document(document: Page | undefined) {
     this._document = document;
     this.prepareDocument();
   }
-  get document(): Document | undefined {
+  get document(): Page | undefined {
     return this._document;
   }
 

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { DocumentsListResponse } from '../model/documents-list-response';
-import { DocumentsMock } from '../mock/documents.mock';
+import { DocumentResponse } from '../model/document-response';
+import { DocumentMock } from '../mock/document.mock';
 import { Slug } from '../model/slug';
-import { Document } from '../model/document';
+import { Page } from '../model/page';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +12,12 @@ export class ApiDocumentsService {
 
   constructor() { }
 
-  list(): Observable<DocumentsListResponse> {
-    return of(DocumentsMock);
+  list(): Observable<DocumentResponse> {
+    return of(DocumentMock);
   }
 
-  get(slug: Slug): Observable<Document | undefined> {
-    return of(DocumentsMock.list.find(item => item.slug === slug));
+  page(slug: Slug): Observable<Page | undefined> {
+    return of(DocumentMock.list.find(item => item.slug === slug));
   }
 
 

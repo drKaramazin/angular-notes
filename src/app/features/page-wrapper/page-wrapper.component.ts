@@ -3,17 +3,17 @@ import { switchMap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
-import { Document } from '@app/model/document';
+import { Page } from '@app/model/page';
 import { environment } from '@env/environment.prod';
 
 @Component({
-  selector: 'app-document-page',
-  templateUrl: './document-page.component.html',
-  styleUrls: ['./document-page.component.scss']
+  selector: 'app-page-wrapper',
+  templateUrl: './page-wrapper.component.html',
+  styleUrls: ['./page-wrapper.component.scss']
 })
-export class DocumentPageComponent extends BaseAbstractComponent implements OnInit {
+export class PageWrapperComponent extends BaseAbstractComponent implements OnInit {
 
-  document?: Document;
+  document?: Page;
   zoom: number = environment.zoom.default;
 
   constructor(
@@ -26,7 +26,7 @@ export class DocumentPageComponent extends BaseAbstractComponent implements OnIn
   ngOnInit(): void {
     this.route.params.pipe(
       this.takeUntilDestroyed(),
-      switchMap(params => this.apiDocumentsService.get(params['documentSlug'])),
+      switchMap(params => this.apiDocumentsService.page(params['pageSlug'])),
     ).subscribe(document => this.document = document);
   }
 

@@ -1,21 +1,21 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DocumentsListComponent } from './documents-list.component';
+import { DocumentComponent } from './document.component';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [{
   path: '',
-  component: DocumentsListComponent,
-  loadChildren: () => import('../document-page/document-page.module').then(m => m.DocumentPageModule),
+  component: DocumentComponent,
+  loadChildren: () => import('../page-wrapper/page-wrapper.module').then(m => m.PageWrapperModule),
 }];
 
 @NgModule({
   declarations: [
-    DocumentsListComponent,
+    DocumentComponent,
   ],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
   ]
 })
-export class DocumentsListModule { }
+export class DocumentModule { }

@@ -1,6 +1,0 @@
-<nav *ngIf="list">
-  <a *ngFor="let document of list.list" [routerLink]="[document.slug]">{{document.name}}</a>
-</nav>
-<section class="container">
-  <router-outlet></router-outlet>
-</section>

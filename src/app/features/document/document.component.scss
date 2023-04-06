@@ -7,13 +7,22 @@
   @include wh-100;
 }
 
+.pages {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  @include h-100;
+  background: $color-blue-500;
+  color: $color-white;
+  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+}
+
 nav {
   display: flex;
   flex-direction: column;
   width: 300px;
-  background: $color-blue-500;
   flex-shrink: 0;
-  @include h-100;
 
   a {
     color: $color-white;

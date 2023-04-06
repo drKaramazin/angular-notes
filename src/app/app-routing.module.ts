@@ -7,7 +7,7 @@ const routes: Routes = [{
   pathMatch: 'full',
 }, {
   path: 'document',
-  loadChildren: () => import('./pages/documents-list/documents-list.module').then(m => m.DocumentsListModule),
+  loadChildren: () => import('./features/document/document.module').then(m => m.DocumentModule),
 }];
 
 @NgModule({
