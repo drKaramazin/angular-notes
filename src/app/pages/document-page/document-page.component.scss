@@ -1,0 +1,6 @@
+@import "mixins";
+
+:host {
+  @include wh-100;
+  overflow: hidden;
+}

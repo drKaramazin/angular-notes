@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { MonoTypeOperatorFunction, Subject, takeUntil } from 'rxjs';
 
 @Injectable()
-export abstract class DestroyAbstractComponent implements OnDestroy {
+export abstract class BaseAbstractComponent implements OnDestroy {
 
   protected readonly destroy$ = new Subject<void>();
 

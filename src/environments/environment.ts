@@ -3,7 +3,13 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  zoom: {
+    default: 100,
+    min: 10,
+    max: 300,
+    step: 10,
+  },
 };
 
 /*

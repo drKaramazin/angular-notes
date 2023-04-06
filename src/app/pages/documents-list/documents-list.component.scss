@@ -29,4 +29,5 @@ nav {
 .container {
   @include h-100;
   flex-grow: 1;
+  overflow: hidden;
 }

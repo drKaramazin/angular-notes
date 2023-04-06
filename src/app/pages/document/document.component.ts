@@ -3,17 +3,19 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  Input,
   OnDestroy,
   ViewChild
 } from '@angular/core';
 import Konva from 'konva';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, switchMap, takeUntil } from 'rxjs';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
 import { Document } from '@app/model/document';
 import Layer = Konva.Layer;
 import Stage = Konva.Stage;
-import { DestroyAbstractComponent } from '@app/abstract/destroy.abstract.component';
+import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
+import { environment } from '@env/environment.prod';
+import Image = Konva.Image;
 
 @Component({
   selector: 'app-document',
@@ -21,24 +23,38 @@ import { DestroyAbstractComponent } from '@app/abstract/destroy.abstract.compone
   styleUrls: ['./document.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentComponent extends DestroyAbstractComponent implements OnDestroy {
+export class DocumentComponent extends BaseAbstractComponent implements OnDestroy {
 
-  private documentElementInit$ = new Subject<void>();
+  @ViewChild('document', { static: false }) documentElementRef?: ElementRef;
 
-  private _documentElementRef?: ElementRef;
-  @ViewChild('document', { static: false }) set documentElementRef(documentElementRef: ElementRef | undefined) {
-    this._documentElementRef = documentElementRef;
-    this.documentElementInit$.next();
-    this.subscribeToParams();
+  private _document?: Document;
+  @Input() set document(document: Document | undefined) {
+    this._document = document;
+    this.prepareDocument();
   }
-  get documentElementRef(): ElementRef | undefined {
-    return this._documentElementRef;
+  get document(): Document | undefined {
+    return this._document;
   }
 
-  document?: Document;
+  private _zoom: number = environment.zoom.default;
+  @Input() set zoom(zoom: number) {
+    this._zoom = zoom;
+    if (this.node) {
+      this.node.setAttrs(this.nodeAttrs());
+      this.stage?.size({
+        width: this.nodeWidth(),
+        height: this.nodeHeight(),
+      });
+    }
+  }
+  get zoom(): number {
+    return this._zoom;
+  }
+
   stage?: Stage;
   layer?: Layer;
   documentNotFound = false;
+  node?: Image;
 
   constructor(
     private route: ActivatedRoute,
@@ -66,38 +82,42 @@ export class DocumentComponent extends DestroyAbstractComponent implements OnDes
     this.stage.add(this.layer);
   }
 
-  subscribeToParams() {
-    this.route.params.pipe(
-      this.takeUntilDestroyed(),
-      takeUntil(this.documentElementInit$),
-      switchMap(params => this.apiDocumentsService.get(params['documentSlug'])),
-    ).subscribe(document => {
-      this.document = document;
-
-      if (this.document) {
-        this.documentNotFound = false;
-
-        Konva.Image.fromURL(this.document!.url, (node) => {
-          node.setAttrs({
-            x: 0,
-            y: 0,
-            scaleX: 1.3,
-            scaleY: 1.3,
-          });
-
-          this.initStage(node.attrs.image.width, node.attrs.image.height);
-          this.layer!.add(node);
-        });
-      } else {
-        this.documentNotFound = true;
-      }
-      this.cdr.detectChanges();
-    });
+  percentToIndex(percent: number): number {
+    return percent / 100;
   }
 
-  override ngOnDestroy() {
-    super.ngOnDestroy();
-    this.documentElementInit$.complete();
+  nodeAttrs(): any {
+    return {
+      x: 0,
+      y: 0,
+      scaleX: this.percentToIndex(this.zoom),
+      scaleY: this.percentToIndex(this.zoom),
+    };
+  }
+
+  nodeWidth(): number {
+    return this.node ? this.node.attrs.image.width * this.percentToIndex(this.zoom): 0;
+  }
+
+  nodeHeight(): number {
+    return this.node ? this.node.attrs.image.height * this.percentToIndex(this.zoom): 0;
+  }
+
+  prepareDocument() {
+    if (this.document) {
+      this.documentNotFound = false;
+
+      Konva.Image.fromURL(this.document!.url, (node) => {
+        this.node = node.setAttrs(this.nodeAttrs());
+
+        this.initStage(this.nodeWidth(), this.nodeHeight());
+        this.layer!.add(node);
+      });
+    } else {
+      this.documentNotFound = true;
+    }
+
+    this.cdr.detectChanges();
   }
 
 }

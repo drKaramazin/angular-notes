@@ -6,7 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 const routes: Routes = [{
   path: '',
   component: DocumentsListComponent,
-  loadChildren: () => import('../document/document.module').then(m => m.DocumentModule),
+  loadChildren: () => import('../document-page/document-page.module').then(m => m.DocumentPageModule),
 }];
 
 @NgModule({

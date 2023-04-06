@@ -1,0 +1,11 @@
+@import "variables";
+
+:host {
+  display: flex;
+  background: $color-blue-500;
+  padding: 10px 20px;
+
+  & > * {
+    margin-left: 10px;
+  }
+}
