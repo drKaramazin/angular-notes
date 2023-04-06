@@ -1,0 +1,17 @@
+@import "mixins";
+
+:host {
+  display: block;
+  @include wh-100;
+  overflow: hidden;
+}
+
+#document {
+  @include wh-100;
+  overflow: scroll;
+}
+
+.error {
+  @include wh-100;
+  @include flex-center;
+}

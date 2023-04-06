@@ -1,1 +1,4 @@
-<div id="document"></div>
+<div *ngIf="documentNotFound; else documentFound" class="error">Document not found</div>
+<ng-template #documentFound>
+  <div id="document" #document></div>
+</ng-template>
