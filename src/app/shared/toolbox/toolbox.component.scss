@@ -1,11 +1,13 @@
 @import "variables";
 
-:host {
+.container {
   display: flex;
   background: $color-blue-500;
   padding: 10px 20px;
 
-  & > * {
-    margin-left: 10px;
-  }
+}
+
+.container > * {
+  margin-right: 10px;
+  color: white;
 }

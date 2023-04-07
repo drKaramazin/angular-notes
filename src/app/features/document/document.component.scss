@@ -32,6 +32,10 @@ nav {
     &:hover {
       background: $color-blue-400;
     }
+
+    &.active {
+      background: $color-blue-300;
+    }
   }
 }
 

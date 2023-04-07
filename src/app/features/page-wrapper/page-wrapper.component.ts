@@ -5,6 +5,7 @@ import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
 import { Page } from '@app/model/page';
 import { environment } from '@env/environment.prod';
+import { NoteService } from '@app/services/note.service';
 
 @Component({
   selector: 'app-page-wrapper',
@@ -19,6 +20,7 @@ export class PageWrapperComponent extends BaseAbstractComponent implements OnIni
   constructor(
     private route: ActivatedRoute,
     private apiDocumentsService: ApiDocumentsService,
+    private noteService: NoteService,
   ) {
     super();
   }
@@ -28,6 +30,10 @@ export class PageWrapperComponent extends BaseAbstractComponent implements OnIni
       this.takeUntilDestroyed(),
       switchMap(params => this.apiDocumentsService.page(params['pageSlug'])),
     ).subscribe(document => this.document = document);
+  }
+
+  addNote() {
+    this.noteService.needsToAddNote();
   }
 
 }

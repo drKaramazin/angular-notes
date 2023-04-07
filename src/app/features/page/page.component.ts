@@ -2,9 +2,9 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
+  ElementRef, HostBinding,
   Input,
-  OnDestroy,
+  OnDestroy, OnInit,
   ViewChild
 } from '@angular/core';
 import Konva from 'konva';
@@ -16,6 +16,7 @@ import Stage = Konva.Stage;
 import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
 import { environment } from '@env/environment.prod';
 import Image = Konva.Image;
+import { NoteService } from '@app/services/note.service';
 
 @Component({
   selector: 'app-page',
@@ -23,9 +24,11 @@ import Image = Konva.Image;
   styleUrls: ['./page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PageComponent extends BaseAbstractComponent implements OnDestroy {
+export class PageComponent extends BaseAbstractComponent implements OnDestroy, OnInit {
 
   @ViewChild('document', { static: false }) documentElementRef?: ElementRef;
+
+  @HostBinding('class') classes: string | undefined;
 
   private _document?: Page;
   @Input() set document(document: Page | undefined) {
@@ -51,6 +54,8 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy {
     return this._zoom;
   }
 
+  isAddingNote$ = this.noteService.isAddingNote();
+
   stage?: Stage;
   layer?: Layer;
   documentNotFound = false;
@@ -60,8 +65,12 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy {
     private route: ActivatedRoute,
     private apiDocumentsService: ApiDocumentsService,
     private cdr: ChangeDetectorRef,
+    private noteService: NoteService,
   ) {
     super();
+  }
+
+  ngOnInit() {
   }
 
   initStage(width: number, height: number) {
@@ -77,6 +86,25 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy {
       width: width,
       height: height,
     });
+
+    this.stage.on('click', (event) => {
+      if (this.isAddingNote$.value) {
+        this.isAddingNote$.next(false);
+        const box = new Konva.Rect({
+          x: this.stage!.getPointerPosition()!.x,
+          y: this.stage!.getPointerPosition()!.y,
+          width: 100,
+          height: 50,
+          fill: '#00D2FF',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: true,
+        });
+
+        this.layer!.add(box);
+      }
+    });
+
 
     this.layer = new Konva.Layer();
     this.stage.add(this.layer);

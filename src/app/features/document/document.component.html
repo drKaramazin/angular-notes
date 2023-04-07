@@ -1,7 +1,10 @@
 <section class="pages">
   <h1>Pages</h1>
   <nav *ngIf="list">
-    <a *ngFor="let document of list.list" [routerLink]="[document.slug]">{{document.name}}</a>
+    <a *ngFor="let document of list.list"
+       [routerLink]="[document.slug]"
+       [ngClass]="{ active: document.slug === activeSlug }"
+    >{{document.name}}</a>
   </nav>
 </section>
 <section class="container">
