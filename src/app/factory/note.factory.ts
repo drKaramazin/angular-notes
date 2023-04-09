@@ -1,6 +1,7 @@
 import { NoteAbstract } from '@app/abstract/note.abstract';
 import { NoteName } from '@app/model/note-name';
 import { ImageNote } from '@app/widgets/image-note';
+import { TextNote } from '@app/widgets/text-note';
 
 export class NoteFactory {
 
@@ -9,7 +10,7 @@ export class NoteFactory {
       case 'image-note':
         return new ImageNote(x, y);
       case 'text-note':
-        return new ImageNote(x, y);
+        return new TextNote(x, y);
     }
   }
 

@@ -9,6 +9,7 @@
 #document {
   @include wh-100;
   overflow: scroll;
+  position: relative;
 }
 
 .error {

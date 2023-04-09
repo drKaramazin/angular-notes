@@ -2,7 +2,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, HostBinding,
+  ElementRef,
+  HostBinding,
   Input,
   OnDestroy, OnInit,
   ViewChild
@@ -55,6 +56,7 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
     this._zoom = zoom;
     if (this.image) {
       this.image.setAttrs(this.nodeAttrs());
+      this.page?.zoom(UnitHelper.percentToIndex(zoom), UnitHelper.percentToIndex(zoom));
       this.stage?.size({
         width: this.nodeWidth(),
         height: this.nodeHeight(),
@@ -88,10 +90,10 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
       if (id) {
         const note = this.page?.find(id);
         if (note) {
-          note.edit(this.stage!, this.layer!);
+          note.edit(this.stage!);
         }
       } else {
-        this.page?.cancelEdit();
+        this.page?.cancelEdit(this.stage!);
       }
     });
   }

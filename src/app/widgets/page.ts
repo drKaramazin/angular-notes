@@ -1,6 +1,8 @@
 import { NoteAbstract } from '@app/abstract/note.abstract';
 import { PageModel } from '@app/model/pageModel';
 import { Slug } from '@app/model/slug';
+import Konva from 'konva';
+import Stage = Konva.Stage;
 
 export class Page implements PageModel {
 
@@ -20,12 +22,16 @@ export class Page implements PageModel {
     return this.notes.find(node => node.selector(id));
   }
 
-  cancelEdit() {
-    this.notes.forEach(note => note.cancelEdit());
+  cancelEdit(stage: Stage) {
+    this.notes.forEach(note => note.cancelEdit(stage));
   }
 
   add(note: NoteAbstract) {
     this.notes.unshift(note);
+  }
+
+  zoom(scaleX: number, scaleY: number) {
+    this.notes.forEach(note => note.zoom(scaleX, scaleY));
   }
 
 }

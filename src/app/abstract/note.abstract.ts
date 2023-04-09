@@ -2,7 +2,6 @@ import Konva from 'konva';
 import { NoteName } from '@app/model/note-name';
 import { v4 as uuidv4 } from 'uuid';
 import Stage = Konva.Stage;
-import Layer = Konva.Layer;
 import Transformer = Konva.Transformer;
 import Group = Konva.Group;
 import Shape = Konva.Shape;
@@ -11,12 +10,12 @@ import Vector2d = Konva.Vector2d;
 export abstract class NoteAbstract {
 
   protected abstract name(): NoteName;
-  protected abstract create(x: number, y: number): Konva.Rect;
-  protected abstract prepareForEdit(stageBox: DOMRect): void;
-  abstract cancelEdit(): void;
+  protected abstract create(x: number, y: number): Shape;
+  protected abstract prepareForEdit(stage: Stage): void;
+  abstract cancelEdit(stage: Stage): void;
   abstract selector(id: string): boolean;
 
-  private node: Konva.Rect;
+  protected node: Shape;
   private group: Konva.Group;
 
   constructor(x: number, y: number) {
@@ -45,10 +44,8 @@ export abstract class NoteAbstract {
     this.group.add(node);
   }
 
-  edit(stage: Stage, layer: Layer) {
-    const stageBox = stage?.container().getBoundingClientRect();
-
-    this.prepareForEdit(stageBox);
+  edit(stage: Stage) {
+    this.prepareForEdit(stage);
   }
 
   selectForTransformation(tr: Transformer) {
@@ -86,6 +83,11 @@ export abstract class NoteAbstract {
 
   delete() {
     this.group.destroy();
+  }
+
+  zoom(scaleX: number, scaleY: number) {
+    this.group.scaleX(scaleX);
+    this.group.scaleY(scaleY);
   }
 
 }
