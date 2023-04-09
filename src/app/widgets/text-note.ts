@@ -12,7 +12,7 @@ export class TextNote extends NoteAbstract {
 
   protected create(x: number, y: number): Konva.Text {
     return new Konva.Text({
-      text: 'Note',
+      text: 'Enter your note',
       fontSize: 20,
       x,
       y,
