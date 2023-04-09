@@ -134,7 +134,7 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
       this.stage!.getPointerPosition()!.x,
       this.stage!.getPointerPosition()!.y,
     );
-    this.page?.add(note)
+    this.page?.add(note);
     note.addToLayer(this.layer!);
     this.store.dispatch(new AddingNote.Deactivate());
     this.checkRightCursor();
