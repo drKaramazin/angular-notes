@@ -1,6 +1,22 @@
 @import "mixins";
+@import "variables";
 
 :host {
   @include wh-100;
   overflow: hidden;
+}
+
+.btn {
+  background: $color-blue-300;
+  border: 1px solid $color-black;
+  color: $color-white;
+
+  &.active {
+    background: $color-yellow;
+    color: $color-black;
+  }
+}
+
+app-toolbox * {
+  margin-right: 20px;
 }

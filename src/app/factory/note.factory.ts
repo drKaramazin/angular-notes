@@ -8,6 +8,8 @@ export class NoteFactory {
     switch (name) {
       case 'image-note':
         return new ImageNote(x, y);
+      case 'text-note':
+        return new ImageNote(x, y);
     }
   }
 

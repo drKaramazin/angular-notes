@@ -1,1 +1,1 @@
-export type NoteName = 'image-note';
+export type NoteName = 'image-note' | 'text-note';

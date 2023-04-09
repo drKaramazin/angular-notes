@@ -10,7 +10,6 @@ import {
 import Konva from 'konva';
 import { ActivatedRoute } from '@angular/router';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
-import { PageModel } from '@app/model/pageModel';
 import Layer = Konva.Layer;
 import Stage = Konva.Stage;
 import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
@@ -21,13 +20,13 @@ import { Store } from '@ngxs/store';
 import { AddingNote } from '@app/store/adding-note.state';
 import { StoreModel } from '@app/store/store';
 import { NoteFactory } from '@app/factory/note.factory';
-import { NoteAbstract } from '@app/abstract/note.abstract';
 import { SelectingNote } from '@app/store/selecting-note.state';
 import { UnitHelper } from '@app/helpes/unit.helper';
 import KonvaEventObject = Konva.KonvaEventObject;
 import { TransformingNote } from '@app/store/transforming-note.state';
 import Shape = Konva.Shape;
 import { PageService } from '@app/services/page.service';
+import { Page } from '@app/widgets/page';
 
 @Component({
   selector: 'app-page',
@@ -41,21 +40,21 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
 
   @HostBinding('class') classes: string | undefined;
 
-  private _document?: PageModel;
-  @Input() set document(document: PageModel | undefined) {
-    this._document = document;
+  private _page?: Page;
+  @Input() set page(document: Page | undefined) {
+    this._page = document;
     this.store.dispatch(new SelectingNote.Cancel());
     this.prepareDocument();
   }
-  get document(): PageModel | undefined {
-    return this._document;
+  get page(): Page | undefined {
+    return this._page;
   }
 
   private _zoom: number = environment.zoom.default;
   @Input() set zoom(zoom: number) {
     this._zoom = zoom;
-    if (this.page) {
-      this.page.setAttrs(this.nodeAttrs());
+    if (this.image) {
+      this.image.setAttrs(this.nodeAttrs());
       this.stage?.size({
         width: this.nodeWidth(),
         height: this.nodeHeight(),
@@ -69,9 +68,8 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
   documentNotFound = false;
   stage?: Stage;
   layer?: Layer;
-  page?: Image;
+  image?: Image;
   transformer?: Transformer;
-  notes: NoteAbstract[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -88,12 +86,12 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
       this.takeUntilDestroyed(),
     ).subscribe(id => {
       if (id) {
-        const note = this.notes.find(note => note.id() === id);
+        const note = this.page?.find(id);
         if (note) {
           note.edit(this.stage!, this.layer!);
         }
       } else {
-        this.notes.forEach(note => note.cancelEdit());
+        this.page?.cancelEdit();
       }
     });
   }
@@ -122,7 +120,7 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
   }
 
   selectNodeByEvent(event: KonvaEventObject<any>) {
-    const node = this.notes.find(node => node.selector(event.target.id()));
+    const node = this.page?.findBySelector(event.target.id());
     if (node) {
       this.store.dispatch(new SelectingNote.Select(node, this.stage!, this.layer!));
     }
@@ -134,7 +132,7 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
       this.stage!.getPointerPosition()!.x,
       this.stage!.getPointerPosition()!.y,
     );
-    this.notes.push(note);
+    this.page?.add(note)
     note.addToLayer(this.layer!);
     this.store.dispatch(new AddingNote.Deactivate());
     this.checkRightCursor();
@@ -147,7 +145,7 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
       return;
     }
 
-    const node = this.notes.find(node => node.selector(target.id()));
+    const node = this.page?.findBySelector(target.id());
     if (node) {
       this.store.dispatch(new TransformingNote.Select(node, this.transformer!));
     }
@@ -155,7 +153,7 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
 
   deleteNote() {
     if (this.store.snapshot()['transformingNote']) {
-      const node = this.notes.find(node => node.selector(this.store.snapshot()['transformingNote']));
+      const node = this.page?.findBySelector(this.store.snapshot()['transformingNote']);
       if (node) {
         this.store.dispatch(new TransformingNote.Cancel(this.transformer!));
         node.delete();
@@ -218,26 +216,26 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
   }
 
   nodeWidth(): number {
-    return this.page ? this.page.attrs.image.width * UnitHelper.percentToIndex(this.zoom): 0;
+    return this.image ? this.image.attrs.image.width * UnitHelper.percentToIndex(this.zoom): 0;
   }
 
   nodeHeight(): number {
-    return this.page ? this.page.attrs.image.height * UnitHelper.percentToIndex(this.zoom): 0;
+    return this.image ? this.image.attrs.image.height * UnitHelper.percentToIndex(this.zoom): 0;
   }
 
   prepareDocument() {
-    if (this.document) {
+    if (this.page) {
       this.documentNotFound = false;
 
-      Konva.Image.fromURL(this.document!.url, (node) => {
-        this.page = node.setAttrs(this.nodeAttrs());
-        this.page.setAttrs({
+      Konva.Image.fromURL(this.page!.url, (node) => {
+        this.image = node.setAttrs(this.nodeAttrs());
+        this.image.setAttrs({
           name: 'page',
         });
 
         this.initStage(this.nodeWidth(), this.nodeHeight());
         this.layer!.add(node);
-        this.page.moveToBottom();
+        this.image.moveToBottom();
       });
     } else {
       this.documentNotFound = true;

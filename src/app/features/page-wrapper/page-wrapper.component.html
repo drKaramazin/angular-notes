@@ -1,8 +1,29 @@
 <app-toolbox>
+
   <app-zoom [(ngModel)]="zoom"></app-zoom>
-  <button type="button" (click)="addImageNote($event)">Add image note</button>
+
+  <button
+    type="button"
+    class="btn"
+    [ngClass]="{ active: (addingNote$ | async) === 'image-note' }"
+    (click)="addImageNote($event)"
+  >Add image note</button>
+
+  <button
+    type="button"
+    class="btn"
+    [ngClass]="{ active: (addingNote$ | async) === 'text-note' }"
+    (click)="addTextNote($event)"
+  >Add text note</button>
+
+  <button
+    type="button"
+    class="btn"
+    (click)="onSave()"
+  >Save</button>
+
 </app-toolbox>
 <app-page
-  [document]="document"
+  [page]="page"
   [zoom]="zoom"
 ></app-page>
