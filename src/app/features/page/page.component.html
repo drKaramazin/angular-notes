@@ -1,4 +1,4 @@
 <div *ngIf="documentNotFound; else documentFound" class="error">Document not found</div>
 <ng-template #documentFound>
-  <div id="document" #document [ngClass]="{ 'adding-note': isAddingNote$ | async }"></div>
+  <div id="document" #document></div>
 </ng-template>

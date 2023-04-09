@@ -1,4 +1,5 @@
 export const environment = {
+  appName: 'Angular Notes',
   production: true,
   zoom: {
     default: 100,

@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { DocumentResponse } from '../model/document-response';
 import { DocumentMock } from '../mock/document.mock';
 import { Slug } from '../model/slug';
-import { Page } from '../model/page';
+import { PageModel } from '../model/pageModel';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,7 @@ export class ApiDocumentsService {
     return of(DocumentMock);
   }
 
-  page(slug: Slug): Observable<Page | undefined> {
+  page(slug: Slug): Observable<PageModel | undefined> {
     return of(DocumentMock.list.find(item => item.slug === slug));
   }
 

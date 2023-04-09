@@ -1,7 +1,7 @@
-import { Page } from './page';
+import { PageModel } from './pageModel';
 
 export interface DocumentResponse {
-  list: Page[];
+  list: PageModel[];
   limit: number;
   index: number;
   total: number;

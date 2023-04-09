@@ -10,13 +10,24 @@ import {
 import Konva from 'konva';
 import { ActivatedRoute } from '@angular/router';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
-import { Page } from '@app/model/page';
+import { PageModel } from '@app/model/pageModel';
 import Layer = Konva.Layer;
 import Stage = Konva.Stage;
 import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
 import { environment } from '@env/environment.prod';
 import Image = Konva.Image;
-import { NoteService } from '@app/services/note.service';
+import Transformer = Konva.Transformer;
+import { Store } from '@ngxs/store';
+import { AddingNote } from '@app/store/adding-note.state';
+import { StoreModel } from '@app/store/store';
+import { NoteFactory } from '@app/factory/note.factory';
+import { NoteAbstract } from '@app/abstract/note.abstract';
+import { SelectingNote } from '@app/store/selecting-note.state';
+import { UnitHelper } from '@app/helpes/unit.helper';
+import KonvaEventObject = Konva.KonvaEventObject;
+import { TransformingNote } from '@app/store/transforming-note.state';
+import Shape = Konva.Shape;
+import { PageService } from '@app/services/page.service';
 
 @Component({
   selector: 'app-page',
@@ -30,20 +41,21 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
 
   @HostBinding('class') classes: string | undefined;
 
-  private _document?: Page;
-  @Input() set document(document: Page | undefined) {
+  private _document?: PageModel;
+  @Input() set document(document: PageModel | undefined) {
     this._document = document;
+    this.store.dispatch(new SelectingNote.Cancel());
     this.prepareDocument();
   }
-  get document(): Page | undefined {
+  get document(): PageModel | undefined {
     return this._document;
   }
 
   private _zoom: number = environment.zoom.default;
   @Input() set zoom(zoom: number) {
     this._zoom = zoom;
-    if (this.node) {
-      this.node.setAttrs(this.nodeAttrs());
+    if (this.page) {
+      this.page.setAttrs(this.nodeAttrs());
       this.stage?.size({
         width: this.nodeWidth(),
         height: this.nodeHeight(),
@@ -54,81 +66,163 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
     return this._zoom;
   }
 
-  isAddingNote$ = this.noteService.isAddingNote();
-
+  documentNotFound = false;
   stage?: Stage;
   layer?: Layer;
-  documentNotFound = false;
-  node?: Image;
+  page?: Image;
+  transformer?: Transformer;
+  notes: NoteAbstract[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private apiDocumentsService: ApiDocumentsService,
     private cdr: ChangeDetectorRef,
-    private noteService: NoteService,
+    private store: Store,
+    private pageService: PageService,
   ) {
     super();
   }
 
+  subscribeToSelectingState() {
+    this.store.select((state: StoreModel) => state.selectingNote).pipe(
+      this.takeUntilDestroyed(),
+    ).subscribe(id => {
+      if (id) {
+        const note = this.notes.find(note => note.id() === id);
+        if (note) {
+          note.edit(this.stage!, this.layer!);
+        }
+      } else {
+        this.notes.forEach(note => note.cancelEdit());
+      }
+    });
+  }
+
+  subscribeToDeleting() {
+    this.pageService.deleting().pipe(
+      this.takeUntilDestroyed(),
+    ).subscribe(() => this.deleteNote());
+  }
+
   ngOnInit() {
+    this.subscribeToDeleting();
+    this.subscribeToSelectingState();
+  }
+
+  checkRightCursor() {
+    if (this.stage) {
+      this.stage.container().style.cursor = this.store.snapshot()['addingNote'] ? 'copy' : 'default';
+    }
+  }
+
+  returnDefaultCursor() {
+    if (this.stage) {
+      this.stage.container().style.cursor = 'default';
+    }
+  }
+
+  selectNodeByEvent(event: KonvaEventObject<any>) {
+    const node = this.notes.find(node => node.selector(event.target.id()));
+    if (node) {
+      this.store.dispatch(new SelectingNote.Select(node, this.stage!, this.layer!));
+    }
+  }
+
+  addingNote() {
+    const note = NoteFactory.create(
+      this.store.snapshot()['addingNote'],
+      this.stage!.getPointerPosition()!.x,
+      this.stage!.getPointerPosition()!.y,
+    );
+    this.notes.push(note);
+    note.addToLayer(this.layer!);
+    this.store.dispatch(new AddingNote.Deactivate());
+    this.checkRightCursor();
+  }
+
+  transformingNote(target: Shape | Stage) {
+    // if click on empty area - remove all selections
+    if (target === this.stage || target.hasName('page')) {
+      this.store.dispatch(new TransformingNote.Cancel(this.transformer!));
+      return;
+    }
+
+    const node = this.notes.find(node => node.selector(target.id()));
+    if (node) {
+      this.store.dispatch(new TransformingNote.Select(node, this.transformer!));
+    }
+  }
+
+  deleteNote() {
+    if (this.store.snapshot()['transformingNote']) {
+      const node = this.notes.find(node => node.selector(this.store.snapshot()['transformingNote']));
+      if (node) {
+        this.store.dispatch(new TransformingNote.Cancel(this.transformer!));
+        node.delete();
+      }
+    }
+  }
+
+  addListeners() {
+    if (this.stage) {
+      this.stage.on('mouseenter', () => this.checkRightCursor());
+
+      this.stage.on('mouseleave', () => this.returnDefaultCursor());
+
+      this.stage.on('click tap', (event) => {
+        this.store.dispatch(new SelectingNote.Cancel());
+
+        if (this.store.snapshot()['addingNote']) {
+          this.addingNote();
+        } else {
+          this.transformingNote(event.target);
+        }
+      });
+
+      this.stage.on('dblclick dbltap', (event) => {
+        this.store.dispatch(new TransformingNote.Cancel(this.transformer!));
+        this.selectNodeByEvent(event);
+      });
+    }
   }
 
   initStage(width: number, height: number) {
-    if (this.layer) {
-      this.layer.destroy();
-    }
-    if (this.stage) {
-      this.stage?.destroy();
-    }
+    this.destroyStage();
 
     this.stage = new Konva.Stage({
       container: 'document',
-      width: width,
-      height: height,
+      width,
+      height,
     });
 
-    this.stage.on('click', (event) => {
-      if (this.isAddingNote$.value) {
-        this.isAddingNote$.next(false);
-        const box = new Konva.Rect({
-          x: this.stage!.getPointerPosition()!.x,
-          y: this.stage!.getPointerPosition()!.y,
-          width: 100,
-          height: 50,
-          fill: '#00D2FF',
-          stroke: 'black',
-          strokeWidth: 4,
-          draggable: true,
-        });
+    this.stage.container().focus();
 
-        this.layer!.add(box);
-      }
-    });
-
+    this.addListeners();
 
     this.layer = new Konva.Layer();
     this.stage.add(this.layer);
-  }
 
-  percentToIndex(percent: number): number {
-    return percent / 100;
+    this.transformer = new Konva.Transformer({
+      rotateEnabled: false,
+    });
+    this.layer.add(this.transformer);
   }
 
   nodeAttrs(): any {
     return {
       x: 0,
       y: 0,
-      scaleX: this.percentToIndex(this.zoom),
-      scaleY: this.percentToIndex(this.zoom),
+      scaleX: UnitHelper.percentToIndex(this.zoom),
+      scaleY: UnitHelper.percentToIndex(this.zoom),
     };
   }
 
   nodeWidth(): number {
-    return this.node ? this.node.attrs.image.width * this.percentToIndex(this.zoom): 0;
+    return this.page ? this.page.attrs.image.width * UnitHelper.percentToIndex(this.zoom): 0;
   }
 
   nodeHeight(): number {
-    return this.node ? this.node.attrs.image.height * this.percentToIndex(this.zoom): 0;
+    return this.page ? this.page.attrs.image.height * UnitHelper.percentToIndex(this.zoom): 0;
   }
 
   prepareDocument() {
@@ -136,16 +230,39 @@ export class PageComponent extends BaseAbstractComponent implements OnDestroy, O
       this.documentNotFound = false;
 
       Konva.Image.fromURL(this.document!.url, (node) => {
-        this.node = node.setAttrs(this.nodeAttrs());
+        this.page = node.setAttrs(this.nodeAttrs());
+        this.page.setAttrs({
+          name: 'page',
+        });
 
         this.initStage(this.nodeWidth(), this.nodeHeight());
         this.layer!.add(node);
+        this.page.moveToBottom();
       });
     } else {
       this.documentNotFound = true;
     }
 
     this.cdr.detectChanges();
+  }
+
+  destroyStage() {
+    if (this.transformer) {
+      this.store.dispatch(new TransformingNote.Cancel(this.transformer));
+      this.transformer.destroy();
+    }
+    if (this.layer) {
+      this.layer.destroy();
+    }
+    if (this.stage) {
+      this.stage?.destroy();
+    }
+  }
+
+  override ngOnDestroy() {
+    super.ngOnDestroy();
+    this.store.dispatch(new SelectingNote.Cancel());
+    this.destroyStage();
   }
 
 }

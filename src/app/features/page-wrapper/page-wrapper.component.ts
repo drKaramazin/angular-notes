@@ -3,9 +3,10 @@ import { switchMap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { BaseAbstractComponent } from '@app/abstract/base.abstract.component';
 import { ApiDocumentsService } from '@app/services/api-documents.service';
-import { Page } from '@app/model/page';
+import { PageModel } from '@app/model/pageModel';
 import { environment } from '@env/environment.prod';
-import { NoteService } from '@app/services/note.service';
+import { Store } from '@ngxs/store';
+import { AddingNote } from '@app/store/adding-note.state';
 
 @Component({
   selector: 'app-page-wrapper',
@@ -14,13 +15,13 @@ import { NoteService } from '@app/services/note.service';
 })
 export class PageWrapperComponent extends BaseAbstractComponent implements OnInit {
 
-  document?: Page;
+  document?: PageModel;
   zoom: number = environment.zoom.default;
 
   constructor(
     private route: ActivatedRoute,
     private apiDocumentsService: ApiDocumentsService,
-    private noteService: NoteService,
+    private store: Store,
   ) {
     super();
   }
@@ -32,8 +33,9 @@ export class PageWrapperComponent extends BaseAbstractComponent implements OnIni
     ).subscribe(document => this.document = document);
   }
 
-  addNote() {
-    this.noteService.needsToAddNote();
+  addImageNote(event: any) {
+    event.stopPropagation();
+    this.store.dispatch(new AddingNote.Activate('image-note'));
   }
 
 }
