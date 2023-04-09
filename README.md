@@ -1,27 +1,22 @@
 # AngularNotes
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.6.
+## Package management
+
+The application uses *yarn* to package management. Thus, run `yarn` to install all the dependencies.
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `yarn start` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Code scaffolding
+## General Approach
+The project makes extensive use of inheritance and abstract classes, as well as global state management.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Advantages and disadvantages
 
-## Build
+The advantage is the ease of adding new annotations. The disadvantage is that the page.component is overloaded with business logic.
+One solution to this problem is to use an abstract parent page class, which additionally makes possible new page classes.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Known issues
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+The annotation may go out of a canvas.
+To solve the problem, it is necessary to track changes in the size and movement of annotations while increasing / decreasing the size of the canvas.
